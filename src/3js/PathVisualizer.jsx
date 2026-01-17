@@ -24,7 +24,7 @@ export default function PathVisualizer({ path }) {
     <mesh>
       {/* 0.3 radius for a nice visible "Pipe" */}
       <tubeGeometry args={[curve, path.length * 10, 0.3, 8, false]} />
-      <meshStandardMaterial color="#3498db" />
+      <meshStandardMaterial color="#12cc60" />
     </mesh>
   )
 }

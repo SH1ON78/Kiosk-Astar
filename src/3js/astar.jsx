@@ -9,7 +9,6 @@ function heuristic(a, b) {
 }
 
 export function astar(startId, goalId) {
-  // Validate start and goal nodes exist
   if (!NODE_MAP[startId] || !NODE_MAP[goalId]) {
     console.error('Invalid start or goal node');
     return null;
@@ -20,7 +19,6 @@ export function astar(startId, goalId) {
   const gScore = {};
   const fScore = {};
 
-  // Initialize scores
   for (const n of NODES) {
     gScore[n.id] = Infinity;
     fScore[n.id] = Infinity;
@@ -30,10 +28,8 @@ export function astar(startId, goalId) {
   fScore[startId] = heuristic(NODE_MAP[startId].pos, NODE_MAP[goalId].pos);
 
   while (open.size > 0) {
-    // Find node in open set with lowest fScore
     let current = [...open].reduce((a, b) => fScore[a] < fScore[b] ? a : b);
 
-    // Goal reached - reconstruct path
     if (current === goalId) {
       const path = [];
       let cur = current;
@@ -46,15 +42,11 @@ export function astar(startId, goalId) {
 
     open.delete(current);
 
-    // Check all neighbors
-    for (const neighborId of NODE_MAP[current].neighbors) {
+    const neighbors = NODE_MAP[current].neighbors || [];
+    for (const neighborId of neighbors) {
       const neighborNode = NODE_MAP[neighborId];
       
-      // FIX: Added existence check to prevent crashing on missing nodes
-      if (!neighborNode) {
-        console.warn(`Node ${current} refers to a missing neighbor: ${neighborId}`);
-        continue; 
-      }
+      if (!neighborNode) continue; 
 
       const tentativeG = gScore[current] + heuristic(
         NODE_MAP[current].pos,
@@ -76,6 +68,6 @@ export function astar(startId, goalId) {
     }
   }
 
-  console.error('No path found between', startId, 'and', goalId);
+  console.warn('No path found between', startId, 'and', goalId);
   return null;
 }
