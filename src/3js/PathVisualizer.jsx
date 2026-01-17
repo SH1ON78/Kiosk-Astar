@@ -1,7 +1,7 @@
 // PathVisualizer.jsx
 import React, { useMemo } from 'react'
 import * as THREE from 'three'
-import { NODE_MAP } from './nodes'
+import { NODE_MAP } from './mainbuilding/components/nodes'
 
 export default function PathVisualizer({ path }) {
   const points = useMemo(() => {

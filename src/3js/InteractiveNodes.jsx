@@ -1,7 +1,7 @@
 // InteractiveNodes.jsx
 import React, { useState } from 'react'
 import { Html } from '@react-three/drei'
-import { NODES } from './nodes'
+import { NODES } from './mainbuilding/components/nodes'
 
 export default function InteractiveNodes({ onSelect, start, end }) {
   const [hovered, setHover] = useState(null)

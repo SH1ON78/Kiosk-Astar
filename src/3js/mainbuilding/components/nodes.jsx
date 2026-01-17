@@ -1,21 +1,29 @@
 // nodes.jsx - Node Graph Data for Pathfinding
 
+const FLOOR_HEIGHT = 8.0 // Matches Building.jsx
+
+// Helper to create landing nodes for smoother paths
+const createLandingNode = (id, x, y, z, label, neighbors) => ({
+  id, pos: [x, y, z], type: 'landing', label, neighbors
+})
+
 // Ground Floor Nodes
 const createGroundFloorNodes = () => {
   const y = 0.2
+  const landingY = y + FLOOR_HEIGHT / 2
   
   return [
-    // Main entrance (bottom center)
+    // Main entrance
     { id: 'F0-MAIN-ENT', pos: [0, y, 12], type: 'entrance', label: 'Main Entrance', neighbors: ['F0-H-C'] },
     
     // Side doors
     { id: 'F0-LEFT-DOOR', pos: [-45, y, 10], type: 'door', label: 'Left Door', neighbors: ['F0-H-L6'] },
     { id: 'F0-RIGHT-DOOR', pos: [45, y, 10], type: 'door', label: 'Right Door', neighbors: ['F0-H-R6'] },
     
-    // Exit path under main stairs
+    // Exit path
     { id: 'F0-EXIT-PATH', pos: [0, y, -10], type: 'exit', label: 'Exit to Buildings', neighbors: ['F0-STAIR-MAIN'] },
     
-    // Hallway nodes (12 segments for 12 rooms each side)
+    // Hallways
     { id: 'F0-H-L6', pos: [-47, y, 0], type: 'hallway', neighbors: ['F0-LEFT-DOOR', 'F0-H-L5', 'F0-R-TL6', 'F0-R-BL6', 'F0-STAIR-LEFT'] },
     { id: 'F0-H-L5', pos: [-41, y, 0], type: 'hallway', neighbors: ['F0-H-L6', 'F0-H-L4', 'F0-R-TL5', 'F0-R-BL5'] },
     { id: 'F0-H-L4', pos: [-35, y, 0], type: 'hallway', neighbors: ['F0-H-L5', 'F0-H-L3', 'F0-R-TL4', 'F0-R-BL4'] },
@@ -30,7 +38,7 @@ const createGroundFloorNodes = () => {
     { id: 'F0-H-R5', pos: [41, y, 0], type: 'hallway', neighbors: ['F0-H-R4', 'F0-H-R6', 'F0-R-TR5', 'F0-R-BR5'] },
     { id: 'F0-H-R6', pos: [47, y, 0], type: 'hallway', neighbors: ['F0-H-R5', 'F0-RIGHT-DOOR', 'F0-R-TR6', 'F0-R-BR6', 'F0-STAIR-RIGHT'] },
     
-    // Rooms - Top side (12 rooms)
+    // Rooms
     { id: 'F0-R-TL6', pos: [-47, y, -8], type: 'room', label: 'Room 001', neighbors: ['F0-H-L6'] },
     { id: 'F0-R-TL5', pos: [-41, y, -8], type: 'room', label: 'Room 002', neighbors: ['F0-H-L5'] },
     { id: 'F0-R-TL4', pos: [-35, y, -8], type: 'room', label: 'Room 003', neighbors: ['F0-H-L4'] },
@@ -44,7 +52,6 @@ const createGroundFloorNodes = () => {
     { id: 'F0-R-TR5', pos: [41, y, -8], type: 'room', label: 'Room 011', neighbors: ['F0-H-R5'] },
     { id: 'F0-R-TR6', pos: [47, y, -8], type: 'room', label: 'Room 012', neighbors: ['F0-H-R6'] },
     
-    // Rooms - Bottom side (12 rooms)
     { id: 'F0-R-BL6', pos: [-47, y, 8], type: 'room', label: 'Room 013', neighbors: ['F0-H-L6'] },
     { id: 'F0-R-BL5', pos: [-41, y, 8], type: 'room', label: 'Room 014', neighbors: ['F0-H-L5'] },
     { id: 'F0-R-BL4', pos: [-35, y, 8], type: 'room', label: 'Room 015', neighbors: ['F0-H-L4'] },
@@ -58,19 +65,25 @@ const createGroundFloorNodes = () => {
     { id: 'F0-R-BR5', pos: [41, y, 8], type: 'room', label: 'Room 023', neighbors: ['F0-H-R5'] },
     { id: 'F0-R-BR6', pos: [47, y, 8], type: 'room', label: 'Room 024', neighbors: ['F0-H-R6'] },
     
-    // Stairs
-    { id: 'F0-STAIR-LEFT', pos: [-48, y, -5], type: 'stairs', label: 'Left Stairs', neighbors: ['F0-H-L6', 'F1-STAIR-LEFT'] },
-    { id: 'F0-STAIR-MAIN', pos: [0, y, -5], type: 'stairs', label: 'Main Stairs', neighbors: ['F0-H-C', 'F0-EXIT-PATH', 'F1-STAIR-MAIN'] },
-    { id: 'F0-STAIR-RIGHT', pos: [48, y, -5], type: 'stairs', label: 'Right Stairs', neighbors: ['F0-H-R6', 'F1-STAIR-RIGHT'] }
+    // Stairs (Base)
+    { id: 'F0-STAIR-MAIN', pos: [0, y, -5], type: 'stairs', label: 'Main Stairs', neighbors: ['F0-H-C', 'F0-EXIT-PATH', 'F0-STAIR-MAIN-LANDING'] },
+    { id: 'F0-STAIR-LEFT', pos: [-48, y, -5], type: 'stairs', label: 'Left Stairs', neighbors: ['F0-H-L6', 'F0-STAIR-LEFT-LANDING'] },
+    { id: 'F0-STAIR-RIGHT', pos: [48, y, -5], type: 'stairs', label: 'Right Stairs', neighbors: ['F0-H-R6', 'F0-STAIR-RIGHT-LANDING'] },
+
+    // Stairs (Landings) - pushed back in Z to simulate the U-shape depth
+    createLandingNode('F0-STAIR-MAIN-LANDING', 0, landingY, -8, 'Landing', ['F0-STAIR-MAIN', 'F1-STAIR-MAIN']),
+    createLandingNode('F0-STAIR-LEFT-LANDING', -48, landingY, -8, 'Landing', ['F0-STAIR-LEFT', 'F1-STAIR-LEFT']),
+    createLandingNode('F0-STAIR-RIGHT-LANDING', 48, landingY, -8, 'Landing', ['F0-STAIR-RIGHT', 'F1-STAIR-RIGHT']),
   ]
 }
 
 // Floor 1 Nodes
 const createFloor1Nodes = () => {
-  const y = 1 * 4 + 0.2
+  const y = 1 * FLOOR_HEIGHT + 0.2
+  const landingY = y + FLOOR_HEIGHT / 2
   
   return [
-    // Hallway nodes
+    // Hallways
     { id: 'F1-H-L6', pos: [-47, y, 0], type: 'hallway', neighbors: ['F1-H-L5', 'F1-R-TL6', 'F1-R-BL6', 'F1-STAIR-LEFT'] },
     { id: 'F1-H-L5', pos: [-41, y, 0], type: 'hallway', neighbors: ['F1-H-L6', 'F1-H-L4', 'F1-R-TL5', 'F1-R-BL5'] },
     { id: 'F1-H-L4', pos: [-35, y, 0], type: 'hallway', neighbors: ['F1-H-L5', 'F1-H-L3', 'F1-R-TL4', 'F1-R-BL4'] },
@@ -85,7 +98,7 @@ const createFloor1Nodes = () => {
     { id: 'F1-H-R5', pos: [41, y, 0], type: 'hallway', neighbors: ['F1-H-R4', 'F1-H-R6', 'F1-R-TR5', 'F1-R-BR5'] },
     { id: 'F1-H-R6', pos: [47, y, 0], type: 'hallway', neighbors: ['F1-H-R5', 'F1-R-TR6', 'F1-R-BR6', 'F1-STAIR-RIGHT'] },
     
-    // Rooms - Top side
+    // Rooms
     { id: 'F1-R-TL6', pos: [-47, y, -8], type: 'room', label: 'Room 101', neighbors: ['F1-H-L6'] },
     { id: 'F1-R-TL5', pos: [-41, y, -8], type: 'room', label: 'Room 102', neighbors: ['F1-H-L5'] },
     { id: 'F1-R-TL4', pos: [-35, y, -8], type: 'room', label: 'Room 103', neighbors: ['F1-H-L4'] },
@@ -99,7 +112,6 @@ const createFloor1Nodes = () => {
     { id: 'F1-R-TR5', pos: [41, y, -8], type: 'room', label: 'Room 111', neighbors: ['F1-H-R5'] },
     { id: 'F1-R-TR6', pos: [47, y, -8], type: 'room', label: 'Room 112', neighbors: ['F1-H-R6'] },
     
-    // Rooms - Bottom side
     { id: 'F1-R-BL6', pos: [-47, y, 8], type: 'room', label: 'Room 113', neighbors: ['F1-H-L6'] },
     { id: 'F1-R-BL5', pos: [-41, y, 8], type: 'room', label: 'Room 114', neighbors: ['F1-H-L5'] },
     { id: 'F1-R-BL4', pos: [-35, y, 8], type: 'room', label: 'Room 115', neighbors: ['F1-H-L4'] },
@@ -114,15 +126,21 @@ const createFloor1Nodes = () => {
     { id: 'F1-R-BR6', pos: [47, y, 8], type: 'room', label: 'Room 124', neighbors: ['F1-H-R6'] },
     
     // Stairs
-    { id: 'F1-STAIR-LEFT', pos: [-48, y, -5], type: 'stairs', label: 'Left Stairs', neighbors: ['F1-H-L6', 'F2-STAIR-LEFT'] },
-    { id: 'F1-STAIR-MAIN', pos: [0, y, -5], type: 'stairs', label: 'Main Stairs', neighbors: ['F1-H-C', 'F2-STAIR-MAIN'] },
-    { id: 'F1-STAIR-RIGHT', pos: [48, y, -5], type: 'stairs', label: 'Right Stairs', neighbors: ['F1-H-R6', 'F2-STAIR-RIGHT'] }
+    { id: 'F1-STAIR-MAIN', pos: [0, y, -5], type: 'stairs', label: 'Main Stairs', neighbors: ['F1-H-C', 'F0-STAIR-MAIN-LANDING', 'F1-STAIR-MAIN-LANDING'] },
+    { id: 'F1-STAIR-LEFT', pos: [-48, y, -5], type: 'stairs', label: 'Left Stairs', neighbors: ['F1-H-L6', 'F0-STAIR-LEFT-LANDING', 'F1-STAIR-LEFT-LANDING'] },
+    { id: 'F1-STAIR-RIGHT', pos: [48, y, -5], type: 'stairs', label: 'Right Stairs', neighbors: ['F1-H-R6', 'F0-STAIR-RIGHT-LANDING', 'F1-STAIR-RIGHT-LANDING'] },
+
+    // Landings
+    createLandingNode('F1-STAIR-MAIN-LANDING', 0, landingY, -8, 'Landing', ['F1-STAIR-MAIN', 'F2-STAIR-MAIN']),
+    createLandingNode('F1-STAIR-LEFT-LANDING', -48, landingY, -8, 'Landing', ['F1-STAIR-LEFT', 'F2-STAIR-LEFT']),
+    createLandingNode('F1-STAIR-RIGHT-LANDING', 48, landingY, -8, 'Landing', ['F1-STAIR-RIGHT', 'F2-STAIR-RIGHT']),
   ]
 }
 
 // Floor 2 Nodes
 const createFloor2Nodes = () => {
-  const y = 2 * 4 + 0.2
+  const y = 2 * FLOOR_HEIGHT + 0.2
+  const landingY = y + FLOOR_HEIGHT / 2
   
   return [
     // Hallway nodes
@@ -140,7 +158,7 @@ const createFloor2Nodes = () => {
     { id: 'F2-H-R5', pos: [41, y, 0], type: 'hallway', neighbors: ['F2-H-R4', 'F2-H-R6', 'F2-R-TR5', 'F2-R-BR5'] },
     { id: 'F2-H-R6', pos: [47, y, 0], type: 'hallway', neighbors: ['F2-H-R5', 'F2-R-TR6', 'F2-R-BR6', 'F2-STAIR-RIGHT'] },
     
-    // Rooms - Top side
+    // Rooms
     { id: 'F2-R-TL6', pos: [-47, y, -8], type: 'room', label: 'Room 201', neighbors: ['F2-H-L6'] },
     { id: 'F2-R-TL5', pos: [-41, y, -8], type: 'room', label: 'Room 202', neighbors: ['F2-H-L5'] },
     { id: 'F2-R-TL4', pos: [-35, y, -8], type: 'room', label: 'Room 203', neighbors: ['F2-H-L4'] },
@@ -154,7 +172,6 @@ const createFloor2Nodes = () => {
     { id: 'F2-R-TR5', pos: [41, y, -8], type: 'room', label: 'Room 211', neighbors: ['F2-H-R5'] },
     { id: 'F2-R-TR6', pos: [47, y, -8], type: 'room', label: 'Room 212', neighbors: ['F2-H-R6'] },
     
-    // Rooms - Bottom side
     { id: 'F2-R-BL6', pos: [-47, y, 8], type: 'room', label: 'Room 213', neighbors: ['F2-H-L6'] },
     { id: 'F2-R-BL5', pos: [-41, y, 8], type: 'room', label: 'Room 214', neighbors: ['F2-H-L5'] },
     { id: 'F2-R-BL4', pos: [-35, y, 8], type: 'room', label: 'Room 215', neighbors: ['F2-H-L4'] },
@@ -169,15 +186,20 @@ const createFloor2Nodes = () => {
     { id: 'F2-R-BR6', pos: [47, y, 8], type: 'room', label: 'Room 224', neighbors: ['F2-H-R6'] },
     
     // Stairs
-    { id: 'F2-STAIR-LEFT', pos: [-48, y, -5], type: 'stairs', label: 'Left Stairs', neighbors: ['F2-H-L6', 'F3-STAIR-LEFT'] },
-    { id: 'F2-STAIR-MAIN', pos: [0, y, -5], type: 'stairs', label: 'Main Stairs', neighbors: ['F2-H-C', 'F3-STAIR-MAIN'] },
-    { id: 'F2-STAIR-RIGHT', pos: [48, y, -5], type: 'stairs', label: 'Right Stairs', neighbors: ['F2-H-R6', 'F3-STAIR-RIGHT'] }
+    { id: 'F2-STAIR-MAIN', pos: [0, y, -5], type: 'stairs', label: 'Main Stairs', neighbors: ['F2-H-C', 'F1-STAIR-MAIN-LANDING', 'F2-STAIR-MAIN-LANDING'] },
+    { id: 'F2-STAIR-LEFT', pos: [-48, y, -5], type: 'stairs', label: 'Left Stairs', neighbors: ['F2-H-L6', 'F1-STAIR-LEFT-LANDING', 'F2-STAIR-LEFT-LANDING'] },
+    { id: 'F2-STAIR-RIGHT', pos: [48, y, -5], type: 'stairs', label: 'Right Stairs', neighbors: ['F2-H-R6', 'F1-STAIR-RIGHT-LANDING', 'F2-STAIR-RIGHT-LANDING'] },
+
+    // Landings
+    createLandingNode('F2-STAIR-MAIN-LANDING', 0, landingY, -8, 'Landing', ['F2-STAIR-MAIN', 'F3-STAIR-MAIN']),
+    createLandingNode('F2-STAIR-LEFT-LANDING', -48, landingY, -8, 'Landing', ['F2-STAIR-LEFT', 'F3-STAIR-LEFT']),
+    createLandingNode('F2-STAIR-RIGHT-LANDING', 48, landingY, -8, 'Landing', ['F2-STAIR-RIGHT', 'F3-STAIR-RIGHT']),
   ]
 }
 
 // Floor 3 Nodes (Gym Floor)
 const createFloor3Nodes = () => {
-  const y = 3 * 4 + 0.2
+  const y = 3 * FLOOR_HEIGHT + 0.2
   
   return [
     // Hallway
@@ -187,10 +209,10 @@ const createFloor3Nodes = () => {
     { id: 'F3-GYM-LEFT', pos: [-25, y, 0], type: 'gym', label: 'Gym 1', neighbors: ['F3-H-C', 'F3-STAIR-LEFT'] },
     { id: 'F3-GYM-RIGHT', pos: [25, y, 0], type: 'gym', label: 'Gym 2', neighbors: ['F3-H-C', 'F3-STAIR-RIGHT'] },
     
-    // Stairs (terminate here - no connection to F4)
-    { id: 'F3-STAIR-LEFT', pos: [-48, y, -5], type: 'stairs', label: 'Left Stairs', neighbors: ['F3-GYM-LEFT'] },
-    { id: 'F3-STAIR-MAIN', pos: [0, y, -5], type: 'stairs', label: 'Main Stairs', neighbors: ['F3-H-C'] },
-    { id: 'F3-STAIR-RIGHT', pos: [48, y, -5], type: 'stairs', label: 'Right Stairs', neighbors: ['F3-GYM-RIGHT'] }
+    // Stairs (Top connections come from F2 landings)
+    { id: 'F3-STAIR-MAIN', pos: [0, y, -5], type: 'stairs', label: 'Main Stairs', neighbors: ['F3-H-C', 'F2-STAIR-MAIN-LANDING'] },
+    { id: 'F3-STAIR-LEFT', pos: [-48, y, -5], type: 'stairs', label: 'Left Stairs', neighbors: ['F3-GYM-LEFT', 'F2-STAIR-LEFT-LANDING'] },
+    { id: 'F3-STAIR-RIGHT', pos: [48, y, -5], type: 'stairs', label: 'Right Stairs', neighbors: ['F3-GYM-RIGHT', 'F2-STAIR-RIGHT-LANDING'] },
   ]
 }
 

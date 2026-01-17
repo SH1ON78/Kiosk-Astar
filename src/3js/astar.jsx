@@ -1,5 +1,5 @@
 // astar.jsx - A* Pathfinding Algorithm
-import { NODES, NODE_MAP } from './nodes'
+import { NODES, NODE_MAP } from './mainbuilding/components/nodes'
 
 // Heuristic function (Euclidean distance)
 function heuristic(a, b) {

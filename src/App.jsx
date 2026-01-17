@@ -1,7 +1,7 @@
 // App.jsx
 import React, { useState, useEffect } from 'react'
 import Scene3D from './3js/Scene3D'
-import { NODES, NODE_MAP } from './3js/nodes'
+import { NODES, NODE_MAP } from './3js/mainbuilding/components/nodes'
 import { astar } from './3js/astar'
 
 export default function App() {
