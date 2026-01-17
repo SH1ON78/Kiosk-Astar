@@ -1,10 +1,12 @@
 // InteractiveNodes.jsx
 import React, { useState } from 'react'
 import { Html } from '@react-three/drei'
-import { NODES } from './mainbuilding/components/nodes'
+import { NODES } from './mainbuilding/components/nodes' // Ensure this path is correct relative to this file
 
 export default function InteractiveNodes({ onSelect, start, end }) {
   const [hovered, setHover] = useState(null)
+
+  if (!NODES) return null; // Safety guard against white screen crash
 
   return (
     <group>
@@ -12,35 +14,21 @@ export default function InteractiveNodes({ onSelect, start, end }) {
         const isStart = n.id === start
         const isEnd = n.id === end
         const isHover = n.id === hovered
-
-        // Simple Color Logic
-        let color = '#ccc' // Default grey
-        if (isHover) color = '#f1c40f' // Yellow hover
-        if (isStart) color = '#2ecc71' // Green
-        if (isEnd) color = '#e74c3c'   // Red
-
-        // Only show label if relevant
-        const showLabel = isStart || isEnd || isHover
+        let color = isStart ? '#2ecc71' : isEnd ? '#e74c3c' : isHover ? '#f1c40f' : '#ccc';
 
         return (
           <group key={n.id} position={n.pos}>
             <mesh 
-              onClick={(e) => { e.stopPropagation(); onSelect(n.id) }}
-              onPointerOver={() => setHover(n.id)}
+              onClick={(e) => { e.stopPropagation(); onSelect(n.id); }}
+              onPointerOver={(e) => { e.stopPropagation(); setHover(n.id); }}
               onPointerOut={() => setHover(null)}
             >
-              {/* Simple Sphere */}
-              <sphereGeometry args={[0.4, 16, 16]} />
-              <meshStandardMaterial color={color} />
+              <sphereGeometry args={[0.5, 16, 16]} />
+              <meshStandardMaterial color={color} emissive={isHover ? color : 'black'} emissiveIntensity={0.5} />
             </mesh>
-
-            {showLabel && (
-              <Html distanceFactor={10}>
-                <div style={{ 
-                  background: 'rgba(0,0,0,0.7)', color: 'white', 
-                  padding: '4px 8px', borderRadius: '4px', 
-                  pointerEvents: 'none', whiteSpace: 'nowrap' 
-                }}>
+            {(isStart || isEnd || isHover) && (
+              <Html distanceFactor={15}>
+                <div style={{ background: 'black', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '10px' }}>
                   {n.label || n.id}
                 </div>
               </Html>
